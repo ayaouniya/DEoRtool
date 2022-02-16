@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-class DEORtool(object):
+class DEOR_tool(object):
     
     def power_law_plot(fs=50,fe=100,step=1,R=False): 
         #fs:start freq , fe: end freq , step: freq step , R : return or not

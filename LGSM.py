@@ -226,7 +226,7 @@ class LGSM(ephem.Observer):
         if logged:
             sky = np.log2(sky)
 
-        hp.orthview(sky,half_sky=True,title='%s %s %s %s' %(freqs,self._time,self.lon,self.lat))
+        hp.orthview(sky,half_sky=True,title='%s %s %s %s' %(freq,self._time,self.lon,self.lat))
         
     def view_observed_g(self, logged=False, show=False, **kwargs):
 
