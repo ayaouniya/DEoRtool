@@ -116,6 +116,20 @@ class LGSM(ephem.Observer):
         self.generated_map_freqs = freqs
         
         return map_out
+    
+    def dec_res(self,n_side):
+        
+        gmap = self.generated_map_data
+        lower_res = hp.ud_grade(gmap,n_side)
+        self.generated_map_data = lower_res
+        self._n_side = n_side
+        self._n_pix = hp.nside2npix(self._n_side)
+        self._theta, self._phi = hp.pix2ang(self._n_side, np.arange(self._n_pix))
+        self._time = Time(self.date.datetime())
+        self._pix0 = None
+        self._mask = None
+        
+        return lower_res
 
     def mask_sky(self,idx=0,obstime=None):
         
@@ -158,9 +172,12 @@ class LGSM(ephem.Observer):
         
         return self.observed_sky
     
-    def masks_sky(self,obstime=None):
+    def masks_sky(self,n_side=512,obstime=None):
         
-        self.setup()
+        if n_side == 512:
+            self.setup()
+        else:
+            self.dec_res(n_side)
         
         gmap = self.generated_map_data
         freq = self.generated_map_freqs
