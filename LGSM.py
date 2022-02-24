@@ -31,6 +31,7 @@ class LGSM(ephem.Observer):
         self.generated_map_freqs = None
         
         self.nside = 512
+        self.dec = False
         
     def setup(self):
         
@@ -128,6 +129,7 @@ class LGSM(ephem.Observer):
         self._time = Time(self.date.datetime())
         self._pix0 = None
         self._mask = None
+        self.dec = True
         
         return lower_res
 
@@ -172,13 +174,11 @@ class LGSM(ephem.Observer):
         
         return self.observed_sky
     
-    def masks_sky(self,n_side=512,obstime=None):
+    def masks_sky(self, n_side=512, dec_res = False, obstime=None):
         
-        if n_side == 512:
+        if self.dec==False:
             self.setup()
-        else:
-            self.dec_res(n_side)
-        
+
         gmap = self.generated_map_data
         freq = self.generated_map_freqs
         
@@ -270,7 +270,7 @@ class LGSM(ephem.Observer):
         return sky
     
     def view_observed_c(self, logged=False, show=False, **kwargs):
-        """ View the GSM (Mollweide), with below-horizon area masked. """
+
         sky = self.observed_sky
         if logged:
             sky = np.log2(sky)
@@ -287,3 +287,5 @@ class LGSM(ephem.Observer):
         hp.mollview(sky, coord='C', title = 'Observed Sky in Equatorial',**kwargs)
         
         return sky
+    
+    

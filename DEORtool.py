@@ -2,6 +2,8 @@ from LGSM import LGSM
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
+import healpy as hp
+from cbeam import cbeam
 
 class DEOR_tool(object):
     
@@ -95,4 +97,58 @@ class EoRmod(object):
         T_21cm = 27*X_HI*np.sqrt((1+z)/10)*((T_S-T_CMB)/T_S)
         return T_21cm
     
+class DEOR_simulation(cbeam):
+     
+    def antenna_beam(self,n_side,freq):
+        n_side = n_side
+        freq = freq*1000000
+        
+        n_pix = hp.nside2npix(n_side)
+        vec = hp.ang2vec(np.pi/2,0)
+        ipix_disc = hp.query_disc(nside=n_side, vec=vec, radius=np.radians(90))
+        x, y, z = hp.pix2vec(n_side,ipix_disc)
+        n = len(x)
+        theta = np.arccos(x)
+        phi = np.zeros(n)
+        
+        for i in range(n):
+            if y[i]<0 and z[i]>0:
+                y[i] = -y[i]
+                phi[i] = np.arctan(y[i]/z[i])
+            elif y[i]<0 and z[i]<0:
+                phi[i] =np.pi - np.arctan(y[i]/z[i])
+            elif y[i]>0 and z[i]<0:
+                phi[i] = np.arctan(y[i]/z[i])+np.pi
+            elif y[i]>0 and z[i]>0:
+                phi[i] = np.pi*2 - np.arctan(y[i]/z[i])
+            elif z[i]==0 and y[i]>0:
+                phi[i] = 3*np.pi/2
+            elif z[i]==0 and y[i]<0:
+                phi[i] = np.pi/2
+                
+        t = (theta*180)/np.pi
+        p = (phi*180)/np.pi
+        if type(freq) == int:
+            xi = []
+            for i in range(n):
+                ip = [t[i],p[i],freq]
+                xi.append(ip)
+            self.antenna_beam = self.beam_interpolate(xi)
+        else:
+            n_freq = len(freq)
+            fff = []
+            for j in range(n_freq):
+                xi = []
+                for i in range(n):
+                    ip = [t[i],p[i],freq[j]]
+                    xi.append(ip)
+                antenna_beam = self.beam_interpolate(xi)
+                fff.append(antenna_beam)
+            self.antenna_beam = fff
+                
+        return self.antenna_beam
     
+
+        
+        
+        
